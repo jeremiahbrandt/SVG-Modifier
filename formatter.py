@@ -1,6 +1,7 @@
 import os
 
 ORIGINAL_FILES_DIRECTORY="./original-files"
+NEW_FILES_DIRECTORY="./new-files"
 
 originalFiles=os.listdir(ORIGINAL_FILES_DIRECTORY)
 
@@ -16,6 +17,9 @@ class HTMLProperty:
         vals=tag.split("=")
         self.name=vals[0]
         self.value=vals[1]
+
+    def toHTML(self):
+        return self.name+"=\""+self.value+"\""
 
 class HTMLTag:
     def __init__(self, html):
@@ -51,9 +55,63 @@ class HTMLTag:
         for tag in body:
             self.body.append(HTMLTag(tag))
 
+    def toHTML(self):
+        htmlString=f"<{self.name}"
+
+        for prop in self.tagProperties:
+            htmlString=f"{htmlString} {prop.toHTML()}"
+
+        if self.isSelfClosing:
+            htmlString=f"{htmlString} />"
+        else:
+            htmlString=f"{htmlString}>"
+            for tag in self.body:
+                htmlString=f"{htmlString}{tag.toHTML()}"
+
+            htmlString=f"{htmlString}</{self.name}>"
+        return htmlString
+
+def applySVGChanges(SVGtag):
+    # Change viewbox of SVG
+    for i in range(len(SVGtag.tagProperties)):
+        if(SVGtag.tagProperties[i].name=="viewBox"):
+            SVGtag.tagProperties.pop(i)
+            break
+
+    SVGtag.tagProperties.append(HTMLProperty("viewBox=0 0 40 40"))
+
+    # Remove width & height from SVG
+    for i in range(len(SVGtag.tagProperties)):
+        if(SVGtag.tagProperties[i].name=="width"):
+            SVGtag.tagProperties.pop(i)      
+            break
+    for i in range(len(SVGtag.tagProperties)):
+        if(SVGtag.tagProperties[i].name=="height"):
+            SVGtag.tagProperties.pop(i)      
+            break
+
+    # Add rect
+    SVGtag.body.insert(0, HTMLTag('<rect fill="red" x="0" y="0" width="40" height="40" rx="15"  ry="15"/>'))
+
+    # Add translate & fill properties to path
+    for i in range(len(SVGtag.body)):
+        currTag=SVGtag.body[i]
+        if currTag.name == "path":
+            currTag.tagProperties.append(HTMLProperty('transform=translate(7, 7)'))
+            currTag.tagProperties.append(HTMLProperty('fill=white'))
+
+    # Return modified SVG
+    return SVGtag
 
 
 f=open(f"{ORIGINAL_FILES_DIRECTORY}/{originalFiles[0]}", "r")
 mySVG=HTMLTag(f.readline())
-print(mySVG.body[0].tagProperties[-1].value)
-print(mySVG.tagProperties[-1].value)
+
+myNewSvg=applySVGChanges(mySVG)
+
+# Export SVG
+if not os.path.exists(NEW_FILES_DIRECTORY):
+    os.makedirs(NEW_FILES_DIRECTORY)
+
+nf = open(f"{NEW_FILES_DIRECTORY}/test.svg", "w")
+nf.write(myNewSvg.toHTML())
