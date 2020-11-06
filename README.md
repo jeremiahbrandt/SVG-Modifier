@@ -1,11 +1,11 @@
 # SVG Modifer
-Programmatically modify SVG files from iconmonstr.com
+Programmatically modify SVG files from [iconmonstr](https://iconmonstr.com)
 
 1. Download files from git.
 
         git clone https://github.com/jeremiahbrandt/SVG-Modifier.git
 
-1. Download SVG files from iconmonstr.com into [original-files](original-files)
+1. Download SVG files from iconmonstr.com into [original-files](original-files/)
 
 1. Modify [Config](config.ini) if necessary.
 
