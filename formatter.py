@@ -1,9 +1,12 @@
 import os
+import configparser
 
 ORIGINAL_FILES_DIRECTORY="./original-files"
 NEW_FILES_DIRECTORY="./new-files"
 
 originalFiles=os.listdir(ORIGINAL_FILES_DIRECTORY)
+config=configparser.ConfigParser()
+config.read("config.ini")
 
 def find_nth(haystack, needle, n):
     start = haystack.find(needle)
@@ -71,7 +74,7 @@ class HTMLTag:
             htmlString=f"{htmlString}</{self.name}>"
         return htmlString
 
-def applySVGChanges(SVGtag):
+def applySVGChanges(SVGtag, color):
     # Change viewbox of SVG
     for i in range(len(SVGtag.tagProperties)):
         if(SVGtag.tagProperties[i].name=="viewBox"):
@@ -91,7 +94,7 @@ def applySVGChanges(SVGtag):
             break
 
     # Add rect
-    SVGtag.body.insert(0, HTMLTag('<rect fill="red" x="0" y="0" width="40" height="40" rx="15"  ry="15"/>'))
+    SVGtag.body.insert(0, HTMLTag(f'<rect fill= {color} x="0" y="0" width="40" height="40" rx="15"  ry="15"/>'))
 
     # Add translate & fill properties to path
     for i in range(len(SVGtag.body)):
@@ -103,15 +106,16 @@ def applySVGChanges(SVGtag):
     # Return modified SVG
     return SVGtag
 
+for eachFile in originalFiles:
+    f=open(f"{ORIGINAL_FILES_DIRECTORY}/{eachFile}", "r")
+    mySVG=HTMLTag(f.readline())
 
-f=open(f"{ORIGINAL_FILES_DIRECTORY}/{originalFiles[0]}", "r")
-mySVG=HTMLTag(f.readline())
+    color=config["Rectangle_Fills"][eachFile]
+    myNewSvg=applySVGChanges(mySVG, color)
 
-myNewSvg=applySVGChanges(mySVG)
+    # Export SVG
+    if not os.path.exists(NEW_FILES_DIRECTORY):
+        os.makedirs(NEW_FILES_DIRECTORY)
 
-# Export SVG
-if not os.path.exists(NEW_FILES_DIRECTORY):
-    os.makedirs(NEW_FILES_DIRECTORY)
-
-nf = open(f"{NEW_FILES_DIRECTORY}/test.svg", "w")
-nf.write(myNewSvg.toHTML())
+    nf = open(f"{NEW_FILES_DIRECTORY}/{eachFile}", "w")
+    nf.write(myNewSvg.toHTML())
