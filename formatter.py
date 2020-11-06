@@ -40,16 +40,16 @@ class HTMLTag:
     def createTagProperties(self, html):
         self.tagProperties=[]
         if(self.isSelfClosing):
-            pass
+            rawProps = f'{html.split("/>")[0][len(self.name)+2:-1]}"'.split("=")
         else:
             rawProps = f'{html.split("><")[0][len(self.name)+2:-1]}"'.split("=")
-            for i in range(len(rawProps)-1):
-                name=rawProps[i].split(" ")[-1]
-                nextItem=rawProps[i+1]
-                tag=nextItem[:find_nth(nextItem, '\"', 2)]+"\""
-                self.tagProperties.append(HTMLProperty(f"{name}={tag}"))
+        for i in range(len(rawProps)-1):
+            name=rawProps[i].split(" ")[-1]
+            nextItem=rawProps[i+1]
+            tag=nextItem[:find_nth(nextItem, '\"', 2)]+"\""
+            self.tagProperties.append(HTMLProperty(f"{name}={tag}"))
 
 
 f=open(f"{ORIGINAL_FILES_DIRECTORY}/{originalFiles[0]}", "r")
 mySVG=HTMLTag(f.readline())
-print(mySVG.tagProperties)
+print(mySVG)
