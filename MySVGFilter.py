@@ -27,7 +27,7 @@ def applySVGChanges(SVGtag, color):
     for i in range(len(SVGtag.body)):
         currTag=SVGtag.body[i]
         if currTag.name == "path":
-            currTag.tagProperties.append(HTMLProperty('transform=translate(7, 7)'))
+            currTag.tagProperties.append(HTMLProperty('transform=translate(8, 8)'))
             currTag.tagProperties.append(HTMLProperty('fill=white'))
 
     # Return modified SVG
