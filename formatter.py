@@ -27,15 +27,8 @@ class HTMLTag:
         if self.isSelfClosing:
             pass
         else:
-            tags=html.split(">")
-            self.openingTag=f"{tags[0]}>"
-            self.closingTag=f"{tags[-2]}>"
-            self.body=[]
-            body=tags[1:-2]
-            for i in range(len(body)):
-                body[i]=f"{body[i]}>"
-            for tag in body:
-                self.body.append(HTMLTag(tag))
+            self.createTagBody(html)
+
 
     def createTagProperties(self, html):
         self.tagProperties=[]
@@ -47,9 +40,20 @@ class HTMLTag:
             name=rawProps[i].split(" ")[-1]
             nextItem=rawProps[i+1]
             tag=nextItem[:find_nth(nextItem, '\"', 2)]+"\""
-            self.tagProperties.append(HTMLProperty(f"{name}={tag}"))
+            self.tagProperties.append(HTMLProperty(f"{name}={tag[1:-1]}"))
+
+    def createTagBody(self, html):
+        tags=html.split(">")
+        self.body=[]
+        body=tags[1:-2]
+        for i in range(len(body)):
+            body[i]=f"{body[i]}>"
+        for tag in body:
+            self.body.append(HTMLTag(tag))
+
 
 
 f=open(f"{ORIGINAL_FILES_DIRECTORY}/{originalFiles[0]}", "r")
 mySVG=HTMLTag(f.readline())
-print(mySVG)
+print(mySVG.body[0].tagProperties[-1].value)
+print(mySVG.tagProperties[-1].value)
